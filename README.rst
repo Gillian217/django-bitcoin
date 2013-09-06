@@ -142,6 +142,21 @@ After that you can define your balance_changed and balance_changed_confirmed sig
     def balance_changed_confirmed_handler(sender, **kwargs):
         pass
 
+What happens here
+
+* ``CheckTransactions`` goes through every ``BitcoinAddress`` in the your database
+
+* It asks **50** latest transactions for each address from bitcoind
+
+* If there are any unprocessed transactions in the bitcoind for these addresses,
+  not marked in your database yet,
+  ``CheckTransactions`` creates ``DepositTransactions`` to this wallet and
+  updates the balance
+
+If you have transaction backlog more than 50 transactions per address,
+you need to use ``CheckOldTransactions`` management command to go through
+every transaction for your available bitcoin addresses.
+
 Community
 ==========
 
