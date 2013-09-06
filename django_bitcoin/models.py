@@ -52,6 +52,24 @@ confirmation_choices = (
     (5, "5, (for the paranoid, not recommended)")
 )
 
+_zero = Decimal(0)
+
+def safe_decimal_zero(dec):
+    """ Formats decimal.Decimal zero to MySQL friendly.
+
+    MySQL breaks if you try to query Decimal('0E-8')
+    which is roundtripped Decimal(0) from Django select.
+
+    :param dec: decimal.Decimal instance
+    """
+
+    # 0E-8 compares to 0
+    if dec == _zero:
+        return _zero
+    else:
+        return dec
+
+
 class Transaction(models.Model):
     created_at = models.DateTimeField(default=datetime.datetime.now)
     amount = models.DecimalField(
@@ -216,7 +234,8 @@ class BitcoinAddress(models.Model):
                         balance_changed_confirmed.send(sender=self.wallet,
                             changed=(transaction_amount), bitcoinaddress=self)
 
-                updated = BitcoinAddress.objects.select_for_update().filter(id=self.id, least_received_confirmed=self.least_received_confirmed).update(least_received_confirmed=r)
+
+                updated = BitcoinAddress.objects.select_for_update().filter(id=self.id, least_received_confirmed=safe_decimal_zero(self.least_received_confirmed)).update(least_received_confirmed=r)
 
                 if self.least_received < r:
                     BitcoinAddress.objects.select_for_update().filter(id=self.id,
@@ -250,7 +269,8 @@ class BitcoinAddress(models.Model):
                         balance_changed.send(sender=self.wallet, changed=(transaction_amount), bitcoinaddress=self)
                 # self.least_received = r
                 # self.save()
-                updated = BitcoinAddress.objects.select_for_update().filter(id=self.id, least_received=self.least_received).update(least_received=r)
+
+                updated = BitcoinAddress.objects.select_for_update().filter(id=self.id, least_received=safe_decimal_zero(self.least_received)).update(least_received=r)
                 if self.wallet and minconf==0 and updated:
                     DepositTransaction.objects.create(address=self, amount=transaction_amount, wallet=self.wallet,
                         confirmations=0, txid=triggered_tx)
