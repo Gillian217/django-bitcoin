@@ -30,6 +30,26 @@ Also you have to run a local bitcoind instance, and specify connection string in
 
     BITCOIND_CONNECTION_STRING = "http://bitcoinuser:password@localhost:8332"
 
+Currently the project is tested onlin on MySQL InnoDB engine using
+`https://pypi.python.org/pypi/DistributedLock <DistributedLock>`_
+to make transactions atomic.
+
+Configure your Django database using InnoDB::
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+            'NAME': 'xxx',                      # Or path to database file if using sqlite3.
+            'USER': 'xxx',                      # Not used with sqlite3.
+            'PASSWORD': 'xxx',                  # Not used with sqlite3.
+            'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+            'OPTIONS': {
+                "init_command": "SET storage_engine=INNODB",
+            }
+        }
+    }
+
 Usage
 =====
 
