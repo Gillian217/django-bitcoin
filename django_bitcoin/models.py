@@ -536,6 +536,10 @@ class Wallet(models.Model):
         #super(Wallet, self).save(*args, **kwargs)
 
     def receiving_address(self, fresh_addr=True):
+        """ Get a receiving address for this wallet.
+
+        :param fresh_addr: If True create a new address.
+        """
         while True:
             usable_addresses = self.addresses.filter(active=True).order_by("id")
             if fresh_addr:
@@ -545,8 +549,8 @@ class Wallet(models.Model):
             addr = new_bitcoin_address()
             updated = BitcoinAddress.objects.select_for_update().filter(Q(id=addr.id) & Q(active=True) & Q(least_received__lte=0) & Q(wallet__isnull=True))\
                           .update(active=True, wallet=self)
-            print "addr_id", addr.id, updated
-            # db_transaction.commit()
+
+
             if updated:
                 return addr.address
             else:
