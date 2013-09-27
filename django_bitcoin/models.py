@@ -232,7 +232,7 @@ class BitcoinAddress(models.Model):
                 if settings.BITCOIN_TRANSACTION_SIGNALING:
                     if self.wallet:
                         balance_changed_confirmed.send(sender=self.wallet,
-                            changed=(transaction_amount), bitcoinaddress=self)
+                            changed=(transaction_amount), bitcoinaddress=self, txid=triggered_tx)
 
 
                 updated = BitcoinAddress.objects.select_for_update().filter(id=self.id, least_received_confirmed=safe_decimal_zero(self.least_received_confirmed)).update(least_received_confirmed=r)

@@ -81,6 +81,11 @@ This also means that outgoing bitcoin transactions are "mixed"::
         wallet = ForeignKey(Wallet)
         buyer_happy = BooleanField(default=False)
 
+    def master_wallet():
+        """ Create one singleton master wallet. """
+        mw, created = Wallet.objects.get_or_create(label="system_master_wallet")
+        return mw
+
     buyer=Profile.objects.create()
     seller=Profile.objects.create()
 
@@ -186,6 +191,17 @@ There is a Django form field ``django_bitcoin.BCAddressField.BCAddressField``
 which performs a bitcoin address validation.
 
 You can store the input on your models in ``models.CharField()``.
+
+Simulating incoming bitcoin transactions
+------------------------------------------
+
+For debugging purposes you probably don't want to play with real money.
+Thus, you can simulate incoming bitcoin transactions as following::
+
+    wallet = master_wallet()
+    wallet.send()
+
+
 
 Community
 ==========
