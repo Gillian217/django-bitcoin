@@ -11,6 +11,8 @@ Features
 
 * Simple Bitcoin wallet management
 
+* Bitcoin address input field
+
 * Bitcoin payment processing
 
 * Bitcoin market information
@@ -176,6 +178,14 @@ What happens here
 If you have transaction backlog more than 50 transactions per address,
 you need to use ``CheckOldTransactions`` management command to go through
 every transaction for your available bitcoin addresses.
+
+BCAddressField
+----------------
+
+There is a Django form field ``django_bitcoin.BCAddressField.BCAddressField``
+which performs a bitcoin address validation.
+
+You can store the input on your models in ``models.CharField()``.
 
 Community
 ==========

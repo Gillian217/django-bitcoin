@@ -8,6 +8,13 @@ import hashlib
 
 
 class BCAddressField(forms.CharField):
+    """ Form field for reading bitcoin address from the user input.
+
+    To store bitcoin address on the model you can use:
+
+        models.CharField(max_length=50, blank=True)
+
+    """
     default_error_messages = {
         'invalid': 'Invalid Bitcoin address.',
         }
