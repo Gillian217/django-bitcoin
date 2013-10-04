@@ -12,7 +12,9 @@ from django.contrib.auth.models import User
 
 from django_bitcoin.utils import *
 from django_bitcoin.utils import bitcoind
+
 from django_bitcoin import settings
+from django.conf import settings as django_settings
 
 from django.utils.translation import ugettext as _
 
@@ -144,8 +146,14 @@ def process_outgoing_transactions():
                     from_wallet_id=wt.from_wallet_id)
                 update_wallets.append(wt.from_wallet_id)
         db_transaction.commit()
+
         for wid in update_wallets:
-            update_wallet_balance.delay(wid)
+            if getattr(django_settings, "CELERY_ALWAYS_EAGER", False):
+                # Do not do asyncrhonous transaction processing
+                update_wallet_balance(wid)
+                db_transaction.commit()
+            else:
+                update_wallet_balance.delay(wid)
 
 # TODO: Group outgoing transactions to save on tx fees
 
@@ -672,7 +680,12 @@ class Wallet(models.Model):
                 to_bitcoinaddress=address,
                 outgoing_transaction=outgoing_transaction,
                 description=description)
-            process_outgoing_transactions.delay()
+
+            if getattr(django_settings, "CELERY_ALWAYS_EAGER", False):
+                # Don't try to do asynchronous transactoin processing
+                process_outgoing_transactions()
+            else:
+                process_outgoing_transactions.delay()
             # try:
             #     result = bitcoind.send(address, amount)
             # except jsonrpc.JSONRPCException:
